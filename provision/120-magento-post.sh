@@ -20,12 +20,12 @@ if [ -f "${PROJECT_PATH}/nginx.conf.sample" ] && [ ! -f "${PROJECT_PATH}/nginx.c
   sudo -u vagrant cp "$PROJECT_PATH"/nginx.conf.sample "$PROJECT_PATH"/nginx.conf.tmp
 fi
 if [ -f "${PROJECT_PATH}/nginx.conf" ]; then
-  sudo -u vagrant cp "$PROJECT_PATH"/nginx.conf /home/vagrant/extra/"${PROJECT_NAME}".nginx.conf;
+  sudo -u vagrant cp "$PROJECT_PATH"/nginx.conf /home/vagrant/extra/"${PROJECT_NAME}".nginx.conf
 else
-  sudo -u vagrant cp "$PROJECT_PATH"/nginx.conf.tmp /home/vagrant/extra/"${PROJECT_NAME}".nginx.conf;
+  sudo -u vagrant cp "$PROJECT_PATH"/nginx.conf.tmp /home/vagrant/extra/"${PROJECT_NAME}".nginx.conf
   sudo -u vagrant rm -f "$PROJECT_PATH"/nginx.conf.tmp
 fi
-sudo -u vagrant sed -i "s/fastcgi_buffers 1024 4k;/fastcgi_buffers 16 14k;\n    fastcgi_buffer_size 32k;/" /home/vagrant/extra/"${PROJECT_NAME}".nginx.conf;
+sudo -u vagrant sed -i "s/fastcgi_buffers 1024 4k;/fastcgi_buffers 16 14k;\n    fastcgi_buffer_size 32k;/" /home/vagrant/extra/"${PROJECT_NAME}".nginx.conf
 
 # Composer config
 if [ "$PROJECT_SOURCE" == "composer" ]; then
@@ -45,16 +45,16 @@ fi
 
 # Npm install
 if [ -f "${PROJECT_PATH}/package.json" ] && [ -f "${PROJECT_PATH}/Gruntfile.js" ]; then
-  cd "$PROJECT_PATH" \
-    && echo 'Executing npm install...' \
-    && sudo -u vagrant npm install &> /dev/null \
-    && sudo -u vagrant npm update
+  cd "$PROJECT_PATH" &&
+    echo 'Executing npm install...' &&
+    sudo -u vagrant npm install &>/dev/null &&
+    sudo -u vagrant npm update
 fi
 
 # Change materialization strategy for nfs
 if [ "$PROJECT_MOUNT" == "nfs" ] && [ "$PROJECT_MOUNT_PATH" != "app" ]; then
   if [ -f "${PROJECT_PATH}/.git/config" ]; then
-      sudo -u vagrant git --git-dir "$PROJECT_PATH"/.git update-index --assume-unchanged app/etc/di.xml
+    sudo -u vagrant git --git-dir "$PROJECT_PATH"/.git update-index --assume-unchanged app/etc/di.xml
   fi
   sudo -u vagrant sed -i 's/<item name="view_preprocessed" xsi:type="object">Magento\\\Framework\\\App\\\View\\\Asset\\\MaterializationStrategy\\\Symlink/<item name="view_preprocessed" xsi:type="object">Magento\\\Framework\\\App\\\View\\\Asset\\\MaterializationStrategy\\\Copy/' "$PROJECT_PATH"/app/etc/di.xml
 fi
@@ -63,21 +63,21 @@ fi
 redis-cli flushall
 if $(dpkg --compare-versions "${PROJECT_VERSION}" "gt" "2.2"); then
   sudo -u vagrant "$PROJECT_PATH"/bin/magento -n setup:config:set \
-        --cache-backend=redis \
-        --cache-backend-redis-server=127.0.0.1 \
-        --cache-backend-redis-port=6379 \
-        --cache-backend-redis-db=0 \
-        --page-cache=redis \
-        --page-cache-redis-server=127.0.0.1 \
-        --page-cache-redis-port=6379 \
-        --page-cache-redis-db=1 \
-        --page-cache-redis-compress-data=1
+    --cache-backend=redis \
+    --cache-backend-redis-server=127.0.0.1 \
+    --cache-backend-redis-port=6379 \
+    --cache-backend-redis-db=0 \
+    --page-cache=redis \
+    --page-cache-redis-server=127.0.0.1 \
+    --page-cache-redis-port=6379 \
+    --page-cache-redis-db=1 \
+    --page-cache-redis-compress-data=1
 
   sudo -u vagrant "$PROJECT_PATH"/bin/magento -n setup:config:set \
-        --session-save=redis \
-        --session-save-redis-host=127.0.0.1 \
-        --session-save-redis-port=6379 \
-        --session-save-redis-db=2
+    --session-save=redis \
+    --session-save-redis-host=127.0.0.1 \
+    --session-save-redis-port=6379 \
+    --session-save-redis-db=2
 
   sudo -u vagrant "$PROJECT_PATH"/bin/magento config:set "admin/security/session_lifetime" "31536000"
   sudo -u vagrant "$PROJECT_PATH"/bin/magento config:set "admin/security/lockout_threshold" "180"
@@ -97,7 +97,7 @@ else
 fi
 
 # Set crypt key
-if [ -n "$PROJECT_CRYPT_KEY" ] && [ -f /home/vagrant/extra/db-dump.sql ]; then
+if [ -n "$PROJECT_CRYPT_KEY" ] && [ -f /home/vagrant/extra/db-dump.sql.gz ]; then
   sudo -u vagrant bin/magento setup:config:set -n --key "${PROJECT_CRYPT_KEY}"
 fi
 
@@ -108,7 +108,8 @@ fi
 
 # Get config from source project
 if [ "$PROJECT_SOURCE" != "composer" ]; then
-  cd $PROJECT_PATH; sudo -u vagrant git checkout app/etc/config.php
+  cd $PROJECT_PATH
+  sudo -u vagrant git checkout app/etc/config.php
 fi
 
 # Clean compiled files
