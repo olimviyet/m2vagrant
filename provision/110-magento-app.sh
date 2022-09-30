@@ -17,32 +17,35 @@ if [ "$PROJECT_MOUNT_PATH" == "app" ]; then
 	DIRECTORY_BUILD="/tmp"
 fi
 PROJECT_BUILD="$DIRECTORY_BUILD/$PROJECT_NAME"
+
+### -- Destructive/heavy start --- ###
 rm -rf "$PROJECT_BUILD" &>/dev/null
 chmod -R 777 /tmp
 mkdir -p "$PROJECT_BUILD"
 chown -fR vagrant:vagrant "$PROJECT_BUILD"
 
 # Get installation files from source
-# if [ "$PROJECT_SOURCE" == "composer" ]; then
-# 	echo 'Install using composer'
-# 	sudo -u vagrant composer create-project --no-interaction --no-install --no-progress \
-# 		--repository=https://repo.magento.com/ magento/project-"$PROJECT_EDITION"-edition="$PROJECT_VERSION" "$PROJECT_NAME" -d "$DIRECTORY_BUILD"
-# elif [ "$PROJECT_SOURCE" == "zip" ]; then
-# 	echo 'Install using zip'
-# 	sudo -u vagrant tar -zxvf extra/magento2ce.tar.gz
-# 	sudo -u vagrant cp -r magento2/. $PROJECT_BUILD/
-# 	rm -rf magento2/
-# else
-# 	echo 'Install using git'
-# 	sudo -u vagrant git clone "$PROJECT_REPOSITORY" "$PROJECT_BUILD"
-# 	cd "$PROJECT_BUILD"
-# 	sudo -u vagrant git fetch --all
-# 	git checkout "$PROJECT_SOURCE" --force
-# 	rm -f "$PROJECT_BUILD"/app/etc/config.php "$PROJECT_BUILD"/app/etc/env.php
-# fi
+if [ "$PROJECT_SOURCE" == "composer" ]; then
+	echo 'Install using composer'
+	sudo -u vagrant composer create-project --no-interaction --no-install --no-progress \
+		--repository=https://repo.magento.com/ magento/project-"$PROJECT_EDITION"-edition="$PROJECT_VERSION" "$PROJECT_NAME" -d "$DIRECTORY_BUILD"
+elif [ "$PROJECT_SOURCE" == "zip" ]; then
+	echo 'Install using zip'
+	sudo -u vagrant tar -zxvf extra/magento2ce.tar.gz
+	sudo -u vagrant cp -r magento2/. $PROJECT_BUILD/
+	rm -rf magento2/
+else
+	echo 'Install using git'
+	sudo -u vagrant git clone "$PROJECT_REPOSITORY" "$PROJECT_BUILD"
+	cd "$PROJECT_BUILD"
+	sudo -u vagrant git fetch --all
+	git checkout "$PROJECT_SOURCE" --force
+	rm -f "$PROJECT_BUILD"/app/etc/config.php "$PROJECT_BUILD"/app/etc/env.php
+fi
 
 # Composer install
-# sudo -u vagrant COMPOSER_MEMORY_LIMIT=-1 composer install -d "$PROJECT_BUILD" --no-interaction
+sudo -u vagrant COMPOSER_MEMORY_LIMIT=-1 composer install -d "$PROJECT_BUILD" --no-interaction
+### -- Destructive/heavy end --- ###
 
 # Rsync directory
 if [ "$PROJECT_BUILD" != "$PROJECT_PATH" ]; then
@@ -64,8 +67,12 @@ chown -fR :www-data "$PROJECT_PATH"
 # Run install
 chmod +x "$PROJECT_PATH"/bin/magento
 
-if [ -n "$PROJECT_CRYPT_KEY" ] && [ -f /home/vagrant/extra/db-dump.sql ]; then
+if [ -n "$PROJECT_CRYPT_KEY" ] && [ -f /home/vagrant/extra/db-dump.sql.gz ]; then
 	echo 'Updating DB settings, when using prebuild composer project'
+	if [ -f /home/vagrant/extra/create_quote_tbl.sql ]; then
+		mysql -u root -ppassword magento </home/vagrant/extra/create_quote_tbl.sql
+	fi
+	sudo -u vagrant bin/magento setup:upgrade
 else
 	sudo -u vagrant "$PROJECT_PATH"/bin/magento setup:uninstall -n -q
 	sudo -u vagrant "$PROJECT_PATH"/bin/magento setup:install \

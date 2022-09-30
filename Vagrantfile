@@ -106,23 +106,25 @@ Vagrant.configure(2) do |config|
   config.vm.provision 'file', source: './ssh/id_rsa', destination: '~/.ssh/id_rsa'
   config.vm.provision 'file', source: './ssh/id_rsa.pub', destination: '~/.ssh/id_rsa.pub'
   config.vm.provision 'file', source: './ssh/id_rsa_company', destination: '~/.ssh/id_rsa_company'
+  config.vm.provision 'file', source: './ssh/config', destination: '~/.ssh/config'
+  config.vm.provision 'file', source: './extra/create_quote_tbl.sql', destination: '~/extra/create_quote_tbl.sql'
 
   # Extra provision
   process_extra_file(config, 'extra/001-env.sh')
   process_extra_file(config, 'extra/100-pre-build.sh')
   process_extra_file(config, 'extra/120-post-build.sh')
 
-#   # Import db
-#   if File.file?('db-dump.sql.gz')
-#     config.vm.provision 'file', source: 'db-dump.sql.gz', destination: '/home/vagrant/extra/db-dump.sql.gz', run: 'always'
-#   end
+  # # Import db
+  # if File.file?('db-dump.sql.gz')
+  #   config.vm.provision 'file', source: 'db-dump.sql.gz', destination: '/home/vagrant/extra/db-dump.sql.gz', run: 'always'
+  # end
   
   # # Upload source file
   # if File.file?('magento2ce.tar.gz')
   #   config.vm.provision 'file', source: 'magento2ce.tar.gz', destination: '/home/vagrant/extra/magento2ce.tar.gz', run: 'always'
   # end
 
-  # Environment provisioning
+  # # Environment provisioning
   # config.vm.provision 'shell', path: 'provision/001-system-env.sh', run: 'always', keep_color: true, args: [
   #   projectName, composer['username'], composer['password'],
   #   git['name'], git['email'], git['host'], git['repository'],
@@ -136,19 +138,19 @@ Vagrant.configure(2) do |config|
   if vmconf['provision'] == 'all'
     # config.vm.provision 'shell', path: 'provision/010-system-packages.sh', keep_color: true
     # config.vm.provision 'shell', path: 'provision/020-system-services.sh', keep_color: true
+    # config.vm.provision 'shell', path: 'provision/100-magento-pre.sh', keep_color: true
+    config.vm.provision 'shell', path: 'provision/110-magento-app.sh', keep_color: true
+    # config.vm.provision 'shell', path: 'provision/120-magento-post.sh', keep_color: true
+  end
+  if vmconf['provision'] == 'system'
+    config.vm.provision 'shell', path: 'provision/010-system-packages.sh', keep_color: true
+    config.vm.provision 'shell', path: 'provision/020-system-services.sh', keep_color: true
+  end
+  if vmconf['provision'] == 'magento'
     config.vm.provision 'shell', path: 'provision/100-magento-pre.sh', keep_color: true
     config.vm.provision 'shell', path: 'provision/110-magento-app.sh', keep_color: true
-#     config.vm.provision 'shell', path: 'provision/120-magento-post.sh', keep_color: true
+    config.vm.provision 'shell', path: 'provision/120-magento-post.sh', keep_color: true
   end
-#   if vmconf['provision'] == 'system'
-#     config.vm.provision 'shell', path: 'provision/010-system-packages.sh', keep_color: true
-#     config.vm.provision 'shell', path: 'provision/020-system-services.sh', keep_color: true
-#   end
-#   if vmconf['provision'] == 'magento'
-#     config.vm.provision 'shell', path: 'provision/100-magento-pre.sh', keep_color: true
-#     config.vm.provision 'shell', path: 'provision/110-magento-app.sh', keep_color: true
-#     config.vm.provision 'shell', path: 'provision/120-magento-post.sh', keep_color: true
-#   end
 
 #   # SSH
 #   config.ssh.forward_agent = true
