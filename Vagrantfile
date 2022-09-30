@@ -105,6 +105,7 @@ Vagrant.configure(2) do |config|
   # SSH key provisioning
   config.vm.provision 'file', source: './ssh/id_rsa', destination: '~/.ssh/id_rsa'
   config.vm.provision 'file', source: './ssh/id_rsa.pub', destination: '~/.ssh/id_rsa.pub'
+  config.vm.provision 'file', source: './ssh/id_rsa_company', destination: '~/.ssh/id_rsa_company'
 
   # Extra provision
   process_extra_file(config, 'extra/001-env.sh')
@@ -116,23 +117,29 @@ Vagrant.configure(2) do |config|
 #     config.vm.provision 'file', source: 'db-dump.sql.gz', destination: '/home/vagrant/extra/db-dump.sql.gz', run: 'always'
 #   end
   
-#   # Environment provisioning
-#   config.vm.provision 'shell', path: 'provision/001-system-env.sh', run: 'always', keep_color: true, args: [
-#     projectName, composer['username'], composer['password'],
-#     git['name'], git['email'], git['host'], git['repository'],
-#     magento['url'], magento['php_version'], magento['source'], magento['edition'],
-#     magento['version'], magento['sample'], magento['mode'], magento['currency'],
-#     magento['language'], magento['time_zone'], magento['crypt_key'], vmconf['mount'], vmconf['path']
-#   ]
+  # # Upload source file
+  # if File.file?('magento2ce.tar.gz')
+  #   config.vm.provision 'file', source: 'magento2ce.tar.gz', destination: '/home/vagrant/extra/magento2ce.tar.gz', run: 'always'
+  # end
 
-#   # Shell provisioning
-#   if vmconf['provision'] == 'all'
-#     config.vm.provision 'shell', path: 'provision/010-system-packages.sh', keep_color: true
-#     config.vm.provision 'shell', path: 'provision/020-system-services.sh', keep_color: true
-#     config.vm.provision 'shell', path: 'provision/100-magento-pre.sh', keep_color: true
-#     config.vm.provision 'shell', path: 'provision/110-magento-app.sh', keep_color: true
+  # Environment provisioning
+  # config.vm.provision 'shell', path: 'provision/001-system-env.sh', run: 'always', keep_color: true, args: [
+  #   projectName, composer['username'], composer['password'],
+  #   git['name'], git['email'], git['host'], git['repository'],
+  #   magento['url'], magento['php_version'], magento['source'], magento['edition'],
+  #   magento['version'], magento['sample'], magento['mode'], magento['currency'],
+  #   magento['language'], magento['time_zone'], magento['crypt_key'], vmconf['mount'], vmconf['path'],
+  #   magento['source_branch']
+  # ]
+
+  # Shell provisioning
+  if vmconf['provision'] == 'all'
+    # config.vm.provision 'shell', path: 'provision/010-system-packages.sh', keep_color: true
+    # config.vm.provision 'shell', path: 'provision/020-system-services.sh', keep_color: true
+    # config.vm.provision 'shell', path: 'provision/100-magento-pre.sh', keep_color: true
+    config.vm.provision 'shell', path: 'provision/110-magento-app.sh', keep_color: true
 #     config.vm.provision 'shell', path: 'provision/120-magento-post.sh', keep_color: true
-#   end
+  end
 #   if vmconf['provision'] == 'system'
 #     config.vm.provision 'shell', path: 'provision/010-system-packages.sh', keep_color: true
 #     config.vm.provision 'shell', path: 'provision/020-system-services.sh', keep_color: true
