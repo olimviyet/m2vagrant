@@ -111,54 +111,54 @@ Vagrant.configure(2) do |config|
   process_extra_file(config, 'extra/100-pre-build.sh')
   process_extra_file(config, 'extra/120-post-build.sh')
 
-  # Import db
-  if File.file?('db-dump.sql.gz')
-    config.vm.provision 'file', source: 'db-dump.sql.gz', destination: '/home/vagrant/extra/db-dump.sql.gz', run: 'always'
-  end
+#   # Import db
+#   if File.file?('db-dump.sql.gz')
+#     config.vm.provision 'file', source: 'db-dump.sql.gz', destination: '/home/vagrant/extra/db-dump.sql.gz', run: 'always'
+#   end
   
-  # Environment provisioning
-  config.vm.provision 'shell', path: 'provision/001-system-env.sh', run: 'always', keep_color: true, args: [
-    projectName, composer['username'], composer['password'],
-    git['name'], git['email'], git['host'], git['repository'],
-    magento['url'], magento['php_version'], magento['source'], magento['edition'],
-    magento['version'], magento['sample'], magento['mode'], magento['currency'],
-    magento['language'], magento['time_zone'], magento['crypt_key'], vmconf['mount'], vmconf['path']
-  ]
+#   # Environment provisioning
+#   config.vm.provision 'shell', path: 'provision/001-system-env.sh', run: 'always', keep_color: true, args: [
+#     projectName, composer['username'], composer['password'],
+#     git['name'], git['email'], git['host'], git['repository'],
+#     magento['url'], magento['php_version'], magento['source'], magento['edition'],
+#     magento['version'], magento['sample'], magento['mode'], magento['currency'],
+#     magento['language'], magento['time_zone'], magento['crypt_key'], vmconf['mount'], vmconf['path']
+#   ]
 
-  # Shell provisioning
-  if vmconf['provision'] == 'all'
-    config.vm.provision 'shell', path: 'provision/010-system-packages.sh', keep_color: true
-    config.vm.provision 'shell', path: 'provision/020-system-services.sh', keep_color: true
-    config.vm.provision 'shell', path: 'provision/100-magento-pre.sh', keep_color: true
-    config.vm.provision 'shell', path: 'provision/110-magento-app.sh', keep_color: true
-    config.vm.provision 'shell', path: 'provision/120-magento-post.sh', keep_color: true
-  end
-  if vmconf['provision'] == 'system'
-    config.vm.provision 'shell', path: 'provision/010-system-packages.sh', keep_color: true
-    config.vm.provision 'shell', path: 'provision/020-system-services.sh', keep_color: true
-  end
-  if vmconf['provision'] == 'magento'
-    config.vm.provision 'shell', path: 'provision/100-magento-pre.sh', keep_color: true
-    config.vm.provision 'shell', path: 'provision/110-magento-app.sh', keep_color: true
-    config.vm.provision 'shell', path: 'provision/120-magento-post.sh', keep_color: true
-  end
+#   # Shell provisioning
+#   if vmconf['provision'] == 'all'
+#     config.vm.provision 'shell', path: 'provision/010-system-packages.sh', keep_color: true
+#     config.vm.provision 'shell', path: 'provision/020-system-services.sh', keep_color: true
+#     config.vm.provision 'shell', path: 'provision/100-magento-pre.sh', keep_color: true
+#     config.vm.provision 'shell', path: 'provision/110-magento-app.sh', keep_color: true
+#     config.vm.provision 'shell', path: 'provision/120-magento-post.sh', keep_color: true
+#   end
+#   if vmconf['provision'] == 'system'
+#     config.vm.provision 'shell', path: 'provision/010-system-packages.sh', keep_color: true
+#     config.vm.provision 'shell', path: 'provision/020-system-services.sh', keep_color: true
+#   end
+#   if vmconf['provision'] == 'magento'
+#     config.vm.provision 'shell', path: 'provision/100-magento-pre.sh', keep_color: true
+#     config.vm.provision 'shell', path: 'provision/110-magento-app.sh', keep_color: true
+#     config.vm.provision 'shell', path: 'provision/120-magento-post.sh', keep_color: true
+#   end
 
-  # SSH
-  config.ssh.forward_agent = true
+#   # SSH
+#   config.ssh.forward_agent = true
 
-  # Post up message
-  config.vm.post_up_message = 
-"
----------------------------------------------------------
-Vagrant machine ready to use for #{git['name']}
-   mount           #{vmconf['mount']}
-   path            #{guestDirectory}
-   magento         http://#{magento['url']}
-   phpinfo         http://#{vmconf['network_ip']}/php
-   adminer         http://#{vmconf['network_ip']}/adminer
-   mailhog         http://#{vmconf['network_ip']}:8025
-"
+#   # Post up message
+#   config.vm.post_up_message = 
+# "
+# ---------------------------------------------------------
+# Vagrant machine ready to use for #{git['name']}
+#    mount           #{vmconf['mount']}
+#    path            #{guestDirectory}
+#    magento         http://#{magento['url']}
+#    phpinfo         http://#{vmconf['network_ip']}/php
+#    adminer         http://#{vmconf['network_ip']}/adminer
+#    mailhog         http://#{vmconf['network_ip']}:8025
+# "
 
-  # Triggers
-  triggers(config, vmconf['mount'], vmconf['host_name'], hostDirectory)
+#   # Triggers
+#   triggers(config, vmconf['mount'], vmconf['host_name'], hostDirectory)
 end

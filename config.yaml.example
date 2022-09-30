@@ -18,6 +18,7 @@ git:
 magento:
   url: 'dev.magento.com'
   source: 'composer'
+  source_branch: 'staging'
   edition: 'community'
   version: '2.4.5'
   php_version: 'default'
